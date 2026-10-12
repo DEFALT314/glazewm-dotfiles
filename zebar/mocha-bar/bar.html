@@ -37,7 +37,7 @@
       const $ = id => document.getElementById(id);
       const pad = n => String(n).padStart(2, '0');
 
-      // Workspaces (hyprland/workspaces): numbers 1-9, a dot for the rest.
+      // Workspaces on this monitor: numbers 1-9, a dot for the rest.
       const glazewm = zebar.createProvider({ type: 'glazewm' });
       glazewm.onOutput(wm => {
         $('workspaces').replaceChildren(

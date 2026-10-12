@@ -1,4 +1,4 @@
-# GlazeWM: port of home/hyprland/.config/hypr/*.conf
+# GlazeWM config, ported from my Hyprland setup.
 #
 # Mod key: SUPER on Hyprland -> left ALT here. Windows reserves too many
 # Win+key combos (Win+L always locks the screen, so Win+L "focus right"

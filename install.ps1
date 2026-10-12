@@ -110,8 +110,8 @@ try {
 
 Step 'Wallpaper'
 # Fill = hyprpaper's fit_mode = cover. Company policy may override it.
-$wall = Join-Path ([Environment]::GetFolderPath('MyPictures')) 'tapeta.png'
-Copy-Item "$Root\tapeta.png" $wall -Force
+$wall = "$glzr\wallpaper.png"
+Copy-Item "$Root\assets\wallpaper.png" $wall -Force
 Set-ItemProperty 'HKCU:\Control Panel\Desktop' -Name WallpaperStyle -Value '10'
 Set-ItemProperty 'HKCU:\Control Panel\Desktop' -Name TileWallpaper -Value '0'
 [Win32.Desktop]::SystemParametersInfo(0x14, 0, $wall, $SPIF_UPDATE) | Out-Null  # SPI_SETDESKWALLPAPER

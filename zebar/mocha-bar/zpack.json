@@ -2,7 +2,7 @@
   "$schema": "https://github.com/glzr-io/zebar/raw/v3.0.0/resources/zpack-schema.json",
   "name": "mocha-bar",
   "version": "1.0.0",
-  "description": "Port of home/waybar (Catppuccin Mocha) for GlazeWM.",
+  "description": "Catppuccin Mocha status bar for GlazeWM.",
   "tags": ["topbar"],
   "previewImages": [],
   "repositoryUrl": "",
