@@ -52,10 +52,12 @@ irm https://raw.githubusercontent.com/DEFALT314/glazewm-dotfiles/main/bootstrap.
    winget.
 2. Copies the GlazeWM and Zebar configs to `~\.glzr\`. The first time a
    config already exists, it is moved to `~\.glzr\backup\`.
-3. Applies the Catppuccin colors, font and transparency to Windows Terminal
-   through a
-   [JSON fragment](https://learn.microsoft.com/windows/terminal/json-fragment-extensions),
-   leaving your `settings.json` untouched.
+3. Gives every Windows Terminal profile the Catppuccin colors, font and
+   transparency, and the tabs the Catppuccin theme. It merges
+   [`terminal/catppuccin-mocha.json`](terminal/catppuccin-mocha.json) into
+   your `settings.json` (backed up to `~\.glzr\backup\` first): the colors
+   go to `profiles.defaults`, and profiles that set their own color scheme
+   lose that override. Everything else in the file stays as it was.
 4. Installs and selects the Catppuccin Mocha theme in Flow Launcher.
 5. Sets the Bibata Modern Classic cursor and the wallpaper.
 6. Turns on taskbar auto-hide (the bar replaces it). This restarts Explorer
@@ -195,7 +197,7 @@ keep it available.
 │   ├── mocha-bar/                 status bar widget (HTML, CSS, zpack.json)
 │   │   └── fonts/                 bundled JetBrainsMono Nerd Font subset
 │   └── settings.json              starts the bar with Zebar
-├── terminal/catppuccin-mocha.json Windows Terminal fragment
+├── terminal/catppuccin-mocha.json Windows Terminal settings merged into settings.json
 ├── assets/wallpaper.png
 └── docs/                          README images
 ```

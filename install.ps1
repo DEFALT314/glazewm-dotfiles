@@ -45,6 +45,43 @@ function Save-Download($url, $dst) {
     Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $dst
 }
 
+function Set-Property($object, $name, $value) {
+    $object | Add-Member -Force -NotePropertyName $name -NotePropertyValue $value
+}
+
+# Merges terminal\catppuccin-mocha.json into a Windows Terminal settings.json:
+# replaces the scheme and theme of the same name, sets profiles.defaults and
+# drops per-profile color schemes, so every profile gets the colors.
+function Merge-TerminalSettings($file, $patch) {
+    $settings = if (Test-Path $file) {
+        Get-Content -Raw -Encoding UTF8 $file | ConvertFrom-Json
+    } else {
+        [pscustomobject]@{}
+    }
+    Set-Property $settings theme $patch.theme
+    foreach ($key in 'schemes', 'themes') {
+        $ours = @($patch.$key)
+        $kept = @(@($settings.$key) | Where-Object { $_ -and $_.name -notin $ours.name })
+        Set-Property $settings $key ($kept + $ours)
+    }
+    # Old settings files keep the profile list directly under "profiles".
+    if ($settings.profiles -is [array]) {
+        Set-Property $settings profiles ([pscustomobject]@{ list = $settings.profiles })
+    } elseif (-not $settings.profiles) {
+        Set-Property $settings profiles ([pscustomobject]@{})
+    }
+    if (-not $settings.profiles.defaults) {
+        Set-Property $settings.profiles defaults ([pscustomobject]@{})
+    }
+    foreach ($property in $patch.profiles.defaults.PSObject.Properties) {
+        Set-Property $settings.profiles.defaults $property.Name $property.Value
+    }
+    foreach ($p in @($settings.profiles.list) | Where-Object { $_ }) {
+        $p.PSObject.Properties.Remove('colorScheme')
+    }
+    [IO.File]::WriteAllText($file, ($settings | ConvertTo-Json -Depth 100))
+}
+
 Step 'Apps'
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     throw 'winget not found. Install "App Installer" from the Microsoft Store.'
@@ -64,9 +101,34 @@ Install-Item "$Root\zebar\mocha-bar" "$glzr\zebar\mocha-bar"
 Install-Item "$Root\zebar\settings.json" "$glzr\zebar\settings.json"
 
 Step 'Windows Terminal theme'
-# A fragment instead of editing settings.json: Terminal merges it on start.
-Install-Item "$Root\terminal\catppuccin-mocha.json" `
-    "$env:LOCALAPPDATA\Microsoft\Windows Terminal\Fragments\glazewm-dotfiles\catppuccin-mocha.json"
+# Edits settings.json, because a fragment can't set profiles.defaults. The
+# Store and Preview builds keep it in LocalState, which appears once
+# Terminal has been opened. The first edit is preceded by a backup.
+Remove-Item "$env:LOCALAPPDATA\Microsoft\Windows Terminal\Fragments\glazewm-dotfiles" `
+    -Recurse -Force -ErrorAction SilentlyContinue  # installed by older versions
+$patch = Get-Content -Raw -Encoding UTF8 "$Root\terminal\catppuccin-mocha.json" | ConvertFrom-Json
+$terminalFiles = @(
+    Get-Item "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal*_8wekyb3d8bbwe\LocalState" -ErrorAction SilentlyContinue |
+        ForEach-Object { Join-Path $_.FullName 'settings.json' }
+)
+$unpackaged = "$env:LOCALAPPDATA\Microsoft\Windows Terminal\settings.json"
+if (Test-Path $unpackaged) { $terminalFiles += $unpackaged }
+if (-not $terminalFiles) {
+    Write-Warning 'Windows Terminal settings not found. Open Terminal once, then run the installer again.'
+}
+foreach ($file in $terminalFiles) {
+    try {
+        $backup = "$glzr\backup\$(Split-Path (Split-Path (Split-Path $file)) -Leaf)-settings.json"
+        if ((Test-Path $file) -and -not (Test-Path $backup)) {
+            New-Item -ItemType Directory -Force (Split-Path $backup) | Out-Null
+            Copy-Item $file $backup
+        }
+        Merge-TerminalSettings $file $patch
+        Write-Host "  $file"
+    } catch {
+        Write-Warning "Windows Terminal: couldn't update $file ($_). Merge terminal\catppuccin-mocha.json into it by hand."
+    }
+}
 
 Step 'Flow Launcher theme'
 try {
@@ -76,7 +138,7 @@ try {
     Get-Process Flow.Launcher -ErrorAction SilentlyContinue | Stop-Process -Force
     $settingsPath = "$env:APPDATA\FlowLauncher\Settings\Settings.json"
     if (Test-Path $settingsPath) {
-        $settings = Get-Content -Raw $settingsPath | ConvertFrom-Json
+        $settings = Get-Content -Raw -Encoding UTF8 $settingsPath | ConvertFrom-Json
     } else {
         New-Item -ItemType Directory -Force (Split-Path $settingsPath) | Out-Null
         $settings = [pscustomobject]@{}
