@@ -50,8 +50,8 @@ irm https://raw.githubusercontent.com/DEFALT314/glazewm-dotfiles/main/bootstrap.
 
 1. Installs GlazeWM, Zebar, Flow Launcher and JetBrainsMono Nerd Font with
    winget.
-2. Copies the GlazeWM and Zebar configs to `~\.glzr\`. A config that
-   already exists is backed up once as `<name>.orig`.
+2. Copies the GlazeWM and Zebar configs to `~\.glzr\`. The first time a
+   config already exists, it is moved to `~\.glzr\backup\`.
 3. Applies the Catppuccin colors, font and transparency to Windows Terminal
    through a
    [JSON fragment](https://learn.microsoft.com/windows/terminal/json-fragment-extensions),

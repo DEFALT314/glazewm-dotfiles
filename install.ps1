@@ -5,8 +5,8 @@
 #
 # Installs the apps with winget, copies the configs into place and applies
 # the Windows side: themes, wallpaper, cursor, hidden taskbar, autostart.
-# Safe to re-run. The first time a config already exists it is kept as
-# <name>.orig.
+# Safe to re-run. The first time a config already exists it is moved to
+# ~\.glzr\backup\.
 
 param([string]$Root = $PSScriptRoot)
 
@@ -23,10 +23,17 @@ $SPIF_UPDATE = 3  # SPIF_UPDATEINIFILE | SPIF_SENDCHANGE
 
 function Step($name) { Write-Host "`n== $name" -ForegroundColor Cyan }
 
+# Backups live outside the folders GlazeWM and Zebar read. Zebar loads
+# every ~\.glzr\zebar\*\zpack.json and keys packs by their name, so a
+# backup copy next to the bar would replace it.
 function Install-Item($src, $dst) {
     if (Test-Path $dst) {
-        if (Test-Path "$dst.orig") { Remove-Item $dst -Recurse -Force }
-        else { Move-Item $dst "$dst.orig" }
+        $backup = "$glzr\backup\$(Split-Path $dst -Leaf)"
+        if (Test-Path $backup) { Remove-Item $dst -Recurse -Force }
+        else {
+            New-Item -ItemType Directory -Force (Split-Path $backup) | Out-Null
+            Move-Item $dst $backup
+        }
     }
     New-Item -ItemType Directory -Force (Split-Path $dst) | Out-Null
     Copy-Item $src $dst -Recurse
@@ -49,6 +56,9 @@ foreach ($id in 'glzr-io.glazewm', 'glzr-io.zebar', 'Flow-Launcher.Flow-Launcher
 }
 
 Step 'GlazeWM + Zebar configs'
+# Left by older versions of this script, and loaded by Zebar instead of the
+# current bar (see Install-Item).
+Remove-Item "$glzr\zebar\mocha-bar.orig" -Recurse -Force -ErrorAction SilentlyContinue
 Install-Item "$Root\glazewm\config.yaml" "$glzr\glazewm\config.yaml"
 Install-Item "$Root\zebar\mocha-bar" "$glzr\zebar\mocha-bar"
 Install-Item "$Root\zebar\settings.json" "$glzr\zebar\settings.json"

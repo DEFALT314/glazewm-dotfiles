@@ -14,7 +14,9 @@
         -Uri 'https://github.com/DEFALT314/glazewm-dotfiles/archive/refs/heads/main.zip'
     Remove-Item $unpacked -Recurse -Force -ErrorAction SilentlyContinue
     Expand-Archive $zip $env:TEMP -Force
-    Remove-Item $dest -Recurse -Force -ErrorAction SilentlyContinue
+    # Must not fail silently: Move-Item into a leftover folder would nest the
+    # new copy inside it and run the old install.ps1.
+    if (Test-Path $dest) { Remove-Item $dest -Recurse -Force }
     Move-Item $unpacked $dest
     Remove-Item $zip
 
