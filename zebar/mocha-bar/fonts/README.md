@@ -1,18 +1,26 @@
-# Bar font
+# Bar fonts
 
-`JetBrainsMonoNerdFont-Regular-subset.woff2` is the Regular face of
-[JetBrainsMono Nerd Font](https://github.com/ryanoasis/nerd-fonts), cut
-down to Basic Latin and the icons the bar uses. Shipping it with the widget
-means Windows can't render the bar in another installed weight.
+The bar ships its own fonts, so it looks the same whatever is installed:
 
-To regenerate it after adding an icon, append the icon's code point to
-`--unicodes`:
+- `JetBrainsMono-Variable-subset.woff2`: the variable
+  [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono) (weights
+  100-800), cut down to Basic Latin. The weight is `--text-weight` in
+  `../styles.css`.
+- `JetBrainsMonoNerdFont-icons-subset.woff2`: only the icons the bar uses,
+  taken from [JetBrainsMono Nerd Font](https://github.com/ryanoasis/nerd-fonts)
+  Regular.
+
+To regenerate them, for example after adding an icon (append its code
+point to `--unicodes`):
 
 ```sh
-pyftsubset JetBrainsMonoNerdFont-Regular.ttf \
-  --unicodes="U+0020-007E,U+EA71,U+EAB0,U+F025,U+F028,U+F240-F244,U+F0084,U+F02CA,U+F0425,U+F057E,U+F0580,U+F0709,U+F075F,U+F0904,U+F0906" \
+pyftsubset 'JetBrainsMono[wght].ttf' --unicodes="U+0020-007E" \
   --layout-features='*' --flavor=woff2 \
-  --output-file=JetBrainsMonoNerdFont-Regular-subset.woff2
+  --output-file=JetBrainsMono-Variable-subset.woff2
+
+pyftsubset JetBrainsMonoNerdFont-Regular.ttf \
+  --unicodes="U+EA71,U+EAB0,U+F025,U+F028,U+F240-F244,U+F0084,U+F02CA,U+F0425,U+F057E,U+F0580,U+F0709,U+F075F,U+F0904,U+F0906" \
+  --flavor=woff2 --output-file=JetBrainsMonoNerdFont-icons-subset.woff2
 ```
 
 JetBrains Mono is licensed under the [SIL Open Font License 1.1](OFL.txt).

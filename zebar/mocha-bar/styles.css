@@ -1,15 +1,26 @@
 /* Catppuccin Mocha pills, same layout as my waybar. */
 
-/* Shipped with the widget (see fonts/README.md): with every JetBrainsMono
-   Nerd Font weight installed, Windows renders the bar in a bold face. */
+/* Fonts ship with the widget (see fonts/README.md): JetBrains Mono for the
+   text, as a variable font so the weight can be tuned, and the Nerd Font
+   icons on their own. */
 @font-face {
-  font-family: 'Bar Font';
-  src: url('./fonts/JetBrainsMonoNerdFont-Regular-subset.woff2') format('woff2');
-  font-weight: 400;
+  font-family: 'Bar Text';
+  src: url('./fonts/JetBrainsMono-Variable-subset.woff2') format('woff2');
+  font-weight: 100 800;
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Bar Icons';
+  src: url('./fonts/JetBrainsMonoNerdFont-icons-subset.woff2') format('woff2');
+}
+
 :root {
+  /* The bar's background is transparent, so Windows draws its text in
+     grayscale with a high gamma, and light text on a dark background comes
+     out heavier than in waybar. 300 here looks like waybar's 400. */
+  --text-weight: 300;
+
   --surface0: #313244;
   --text: #cdd6f4;
   --lavender: #b4befe;
@@ -37,10 +48,16 @@ body {
   background: transparent;
 }
 
+/* GTK resolves rem against the 11pt desktop font rather than 16px. Same
+   here, so the rem paddings and margins match waybar's. */
+html {
+  font-size: 11pt;
+}
+
 body {
-  font-family: 'Bar Font', 'JetBrainsMono Nerd Font', monospace;
+  font-family: 'Bar Text', 'Bar Icons', monospace;
   font-size: 15px;
-  font-weight: 400;
+  font-weight: var(--text-weight);
   font-synthesis: none;
   color: var(--text);
   user-select: none;
@@ -77,7 +94,7 @@ button {
    line height, Windows makes them taller and the ends flatter. */
 .workspaces,
 .pill {
-  height: 31px;
+  height: 32px;
   border-radius: 999px;
 }
 
