@@ -21,8 +21,7 @@ installed with one command.
   with vim-style keys, gaps, colored borders, rounded corners and no title
   bars.
 - **Status bar.** A custom [Zebar](https://github.com/glzr-io/zebar) widget
-  with workspaces, clock and date, system tray, volume, battery and a power
-  menu.
+  with workspaces, clock and date, volume, battery and a power menu.
 - **Launcher.** [Flow Launcher](https://github.com/Flow-Launcher/Flow.Launcher)
   with the Catppuccin theme.
 - **One theme everywhere.** Catppuccin Mocha in the bar, Windows Terminal and

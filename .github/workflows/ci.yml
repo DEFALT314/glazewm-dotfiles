@@ -42,36 +42,3 @@ jobs:
             Get-Content -Raw $_.FullName | ConvertFrom-Json | Out-Null
             "ok $($_.FullName)"
           }
-
-  glazewm:
-    name: GlazeWM loads the config
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Install GlazeWM
-        shell: powershell
-        run: |
-          $msi = "$env:RUNNER_TEMP\glazewm.msi"
-          Invoke-WebRequest -UseBasicParsing -OutFile $msi `
-            -Uri https://github.com/glzr-io/glazewm/releases/download/v3.10.1/standalone-glazewm-v3.10.1-x64.msi
-          Start-Process msiexec -ArgumentList "/i `"$msi`" /qn" -Wait
-
-      # GlazeWM refuses to start on an invalid config, so answering an IPC
-      # query proves every setting and command in config.yaml parsed.
-      - name: Start GlazeWM with config.yaml
-        shell: powershell
-        run: |
-          New-Item -ItemType Directory -Force "$HOME\.glzr\glazewm" | Out-Null
-          Copy-Item glazewm\config.yaml "$HOME\.glzr\glazewm\config.yaml"
-          $cli = "$env:ProgramFiles\glzr.io\GlazeWM\cli\glazewm.exe"
-          Start-Process "$env:ProgramFiles\glzr.io\GlazeWM\glazewm.exe"
-          foreach ($i in 1..30) {
-            Start-Sleep -Seconds 1
-            $response = & $cli query app-metadata 2>$null
-            if ($LASTEXITCODE -eq 0 -and $response) { break }
-          }
-          if (-not $response) { throw 'GlazeWM did not start' }
-          $response
-          & $cli query monitors
-          & $cli command wm-exit

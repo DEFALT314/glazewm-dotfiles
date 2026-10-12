@@ -16,7 +16,6 @@
       </div>
 
       <div class="right">
-        <div id="tray" class="pill tray"></div>
         <button id="volume" class="pill volume" hidden></button>
         <div id="battery" class="pill battery" hidden></div>
         <div id="power" class="pill power">
@@ -36,6 +35,10 @@
 
       const $ = id => document.getElementById(id);
       const pad = n => String(n).padStart(2, '0');
+      // Glyphs go in their own span so styles.css can draw them from the
+      // Mono font, separately from the text.
+      const icon = glyph =>
+        Object.assign(document.createElement('span'), { className: 'icon', textContent: glyph });
 
       // Workspaces on this monitor: numbers 1-9, a dot for the rest.
       const glazewm = zebar.createProvider({ type: 'glazewm' });
@@ -57,37 +60,17 @@
       function renderClock() {
         if (!date.output) return;
         const d = new Date(date.output.now);
-        $('clock').textContent = showDate
-          ? `\u{EAB0}  ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`
-          : `\u{F08C7} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        $('clock').replaceChildren(
+          ...(showDate
+            ? [icon('\u{EAB0}'), `  ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`]
+            : [icon('\u{F08C7}'), ` ${pad(d.getHours())}:${pad(d.getMinutes())}`]),
+        );
       }
       date.onOutput(renderClock);
       $('clock').onclick = () => {
         showDate = !showDate;
         renderClock();
       };
-
-      // Tray. Only rebuilt when an icon changes, otherwise it flickers.
-      const systray = zebar.createProvider({ type: 'systray' });
-      let trayKey = '';
-      systray.onOutput(tray => {
-        const key = tray.icons.map(icon => icon.id + icon.iconHash).join();
-        if (key === trayKey) return;
-        trayKey = key;
-        $('tray').replaceChildren(
-          ...tray.icons.map(icon => {
-            const img = document.createElement('img');
-            img.src = icon.iconUrl;
-            img.title = icon.tooltip;
-            img.onclick = () => systray.output.onLeftClick(icon.id);
-            img.oncontextmenu = e => {
-              e.preventDefault();
-              systray.output.onRightClick(icon.id);
-            };
-            return img;
-          }),
-        );
-      });
 
       // Volume (wireplumber): scroll changes by 1%, click toggles mute.
       const audio = zebar.createProvider({ type: 'audio' });
@@ -96,10 +79,11 @@
         const el = $('volume');
         el.hidden = !dev;
         if (!dev) return;
-        const icon = /headphone|słuchawk/i.test(dev.name)
+        const glyph = /headphone|słuchawk/i.test(dev.name)
           ? '\u{F025}'
           : volumeIcons[Math.min(2, Math.floor(dev.volume / 34))];
-        el.textContent = dev.isMuted ? '\u{F075F}' : `${icon} ${Math.round(dev.volume)}%`;
+        if (dev.isMuted) el.replaceChildren(icon('\u{F075F}'));
+        else el.replaceChildren(icon(glyph), ` ${Math.round(dev.volume)}%`);
         el.title = `Volume : ${Math.round(dev.volume)}%`;
       });
       $('volume').onwheel = e => {
@@ -120,9 +104,8 @@
         const el = $('battery');
         const pct = Math.round(bat.chargePercent);
         el.hidden = false;
-        el.textContent = bat.isCharging
-          ? `\u{F0084} ${pct}%`
-          : ` ${batteryIcons[Math.min(4, Math.floor(pct / 20))]} ${pct}%`;
+        const glyph = bat.isCharging ? '\u{F0084}' : batteryIcons[Math.min(4, Math.floor(pct / 20))];
+        el.replaceChildren(' ', icon(glyph), ` ${pct}%`);
       });
       battery.onError(() => ($('battery').hidden = true));
 
