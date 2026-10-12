@@ -1,4 +1,13 @@
 /* Catppuccin Mocha pills, same layout as my waybar. */
+
+/* Pinned to the Regular file by name. With every JetBrainsMono Nerd Font
+   weight and italic installed, Windows otherwise renders the bar in a
+   heavier, slanted face. */
+@font-face {
+  font-family: 'Bar Font';
+  src: local('JetBrainsMono NF Regular'), local('JetBrainsMonoNF-Regular');
+}
+
 :root {
   --surface0: #313244;
   --text: #cdd6f4;
@@ -28,23 +37,13 @@ body {
 }
 
 body {
-  font-family: 'JetBrainsMono Nerd Font', 'JetBrainsMono NF', monospace;
+  font-family: 'Bar Font', 'JetBrainsMono Nerd Font', monospace;
   font-size: 15px;
   font-weight: 400;
-  /* Never fake bold or italic if Windows picks a face without them. */
   font-synthesis: none;
   color: var(--text);
   user-select: none;
   cursor: default;
-}
-
-/* The Mono variant draws icons one cell wide; the regular Nerd Font makes
-   them up to two cells, which looks heavy next to the text. */
-.icon,
-.power button {
-  font-family: 'JetBrainsMono Nerd Font Mono', 'JetBrainsMono NFM', monospace;
-  font-size: 1.2em;
-  line-height: 1;
 }
 
 button {

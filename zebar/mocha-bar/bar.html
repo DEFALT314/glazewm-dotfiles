@@ -35,10 +35,6 @@
 
       const $ = id => document.getElementById(id);
       const pad = n => String(n).padStart(2, '0');
-      // Glyphs go in their own span so styles.css can draw them from the
-      // Mono font, separately from the text.
-      const icon = glyph =>
-        Object.assign(document.createElement('span'), { className: 'icon', textContent: glyph });
 
       // Workspaces on this monitor: numbers 1-9, a dot for the rest.
       const glazewm = zebar.createProvider({ type: 'glazewm' });
@@ -60,11 +56,9 @@
       function renderClock() {
         if (!date.output) return;
         const d = new Date(date.output.now);
-        $('clock').replaceChildren(
-          ...(showDate
-            ? [icon('\u{EAB0}'), `  ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`]
-            : [icon('\u{F08C7}'), ` ${pad(d.getHours())}:${pad(d.getMinutes())}`]),
-        );
+        $('clock').textContent = showDate
+          ? `\u{EAB0}  ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`
+          : `\u{F08C7} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
       }
       date.onOutput(renderClock);
       $('clock').onclick = () => {
@@ -82,8 +76,7 @@
         const glyph = /headphone|słuchawk/i.test(dev.name)
           ? '\u{F025}'
           : volumeIcons[Math.min(2, Math.floor(dev.volume / 34))];
-        if (dev.isMuted) el.replaceChildren(icon('\u{F075F}'));
-        else el.replaceChildren(icon(glyph), ` ${Math.round(dev.volume)}%`);
+        el.textContent = dev.isMuted ? '\u{F075F}' : `${glyph} ${Math.round(dev.volume)}%`;
         el.title = `Volume : ${Math.round(dev.volume)}%`;
       });
       $('volume').onwheel = e => {
@@ -105,7 +98,7 @@
         const pct = Math.round(bat.chargePercent);
         el.hidden = false;
         const glyph = bat.isCharging ? '\u{F0084}' : batteryIcons[Math.min(4, Math.floor(pct / 20))];
-        el.replaceChildren(' ', icon(glyph), ` ${pct}%`);
+        el.textContent = ` ${glyph} ${pct}%`;
       });
       battery.onError(() => ($('battery').hidden = true));
 
