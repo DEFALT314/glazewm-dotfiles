@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bar">
+      <div class="left">
+        <div id="workspaces" class="workspaces"></div>
+      </div>
+
+      <div class="center">
+        <button id="clock" class="pill clock"></button>
+      </div>
+
+      <div class="right">
+        <div id="tray" class="pill tray"></div>
+        <button id="volume" class="pill volume" hidden></button>
+        <div id="battery" class="pill battery" hidden></div>
+        <div id="power" class="pill power">
+          <span class="power-actions">
+            <button data-action="suspend" title="Suspend">&#xF0904;</button>
+            <button data-action="hibernate" title="Hibernate">&#xF02CA;</button>
+            <button data-action="shutdown" title="Shutdown">&#xF0425;</button>
+            <button data-action="reboot" title="Reboot">&#xF0709;</button>
+          </span>
+          <button title="Power">&#xF0906;</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import * as zebar from 'https://esm.sh/zebar@3.3.1';
+
+      const $ = id => document.getElementById(id);
+      const pad = n => String(n).padStart(2, '0');
+
+      // Workspaces (hyprland/workspaces): numbers 1-9, a dot for the rest.
+      const glazewm = zebar.createProvider({ type: 'glazewm' });
+      glazewm.onOutput(wm => {
+        $('workspaces').replaceChildren(
+          ...wm.currentWorkspaces.map(ws => {
+            const button = document.createElement('button');
+            button.className = ws.isDisplayed ? 'workspace active' : 'workspace';
+            button.textContent = ` ${/^[1-9]$/.test(ws.name) ? ws.name : '\u{EA71}'} `;
+            button.onclick = () => wm.runCommand(`focus --workspace ${ws.name}`);
+            return button;
+          }),
+        );
+      });
+
+      // Clock: click toggles between time and date, like format-alt.
+      const date = zebar.createProvider({ type: 'date' });
+      let showDate = false;
+      function renderClock() {
+        if (!date.output) return;
+        const d = new Date(date.output.now);
+        $('clock').textContent = showDate
+          ? `\u{EAB0}  ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`
+          : `\u{F08C7} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      }
+      date.onOutput(renderClock);
+      $('clock').onclick = () => {
+        showDate = !showDate;
+        renderClock();
+      };
+
+      // Tray. Only rebuilt when an icon changes, otherwise it flickers.
+      const systray = zebar.createProvider({ type: 'systray' });
+      let trayKey = '';
+      systray.onOutput(tray => {
+        const key = tray.icons.map(icon => icon.id + icon.iconHash).join();
+        if (key === trayKey) return;
+        trayKey = key;
+        $('tray').replaceChildren(
+          ...tray.icons.map(icon => {
+            const img = document.createElement('img');
+            img.src = icon.iconUrl;
+            img.title = icon.tooltip;
+            img.onclick = () => systray.output.onLeftClick(icon.id);
+            img.oncontextmenu = e => {
+              e.preventDefault();
+              systray.output.onRightClick(icon.id);
+            };
+            return img;
+          }),
+        );
+      });
+
+      // Volume (wireplumber): scroll changes by 1%, click toggles mute.
+      const audio = zebar.createProvider({ type: 'audio' });
+      const volumeIcons = ['\u{F0580}', '\u{F057E}', '\u{F028}'];
+      audio.onOutput(({ defaultPlaybackDevice: dev }) => {
+        const el = $('volume');
+        el.hidden = !dev;
+        if (!dev) return;
+        const icon = /headphone|słuchawk/i.test(dev.name)
+          ? '\u{F025}'
+          : volumeIcons[Math.min(2, Math.floor(dev.volume / 34))];
+        el.textContent = dev.isMuted ? '\u{F075F}' : `${icon} ${Math.round(dev.volume)}%`;
+        el.title = `Volume : ${Math.round(dev.volume)}%`;
+      });
+      $('volume').onwheel = e => {
+        const dev = audio.output?.defaultPlaybackDevice;
+        if (!dev) return;
+        const step = e.deltaY < 0 ? 1 : -1;
+        audio.output.setVolume(Math.max(0, Math.min(100, Math.round(dev.volume) + step)));
+      };
+      $('volume').onclick = () => {
+        const dev = audio.output?.defaultPlaybackDevice;
+        if (dev) audio.output.setMute(!dev.isMuted);
+      };
+
+      // Battery. Hidden on machines without one.
+      const battery = zebar.createProvider({ type: 'battery' });
+      const batteryIcons = ['\u{F244}', '\u{F243}', '\u{F242}', '\u{F241}', '\u{F240}'];
+      battery.onOutput(bat => {
+        const el = $('battery');
+        const pct = Math.round(bat.chargePercent);
+        el.hidden = false;
+        el.textContent = bat.isCharging
+          ? `\u{F0084} ${pct}%`
+          : ` ${batteryIcons[Math.min(4, Math.floor(pct / 20))]} ${pct}%`;
+      });
+      battery.onError(() => ($('battery').hidden = true));
+
+      // Power menu: click the icon to unfold the actions inline (a dropdown
+      // can't leave the bar's window).
+      const powerCommands = {
+        suspend: [
+          'powershell',
+          [
+            '-NoProfile',
+            '-Command',
+            "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Application]::SetSuspendState('Suspend', $false, $false)",
+          ],
+        ],
+        hibernate: ['shutdown', ['/h']],
+        shutdown: ['shutdown', ['/s', '/t', '0']],
+        reboot: ['shutdown', ['/r', '/t', '0']],
+      };
+      const power = $('power');
+      power.onclick = e => {
+        const action = e.target.closest('[data-action]')?.dataset.action;
+        if (!action) {
+          power.classList.toggle('open');
+          return;
+        }
+        power.classList.remove('open');
+        zebar.shellExec(...powerCommands[action]).catch(console.error);
+      };
+      power.onmouseleave = () => power.classList.remove('open');
+    </script>
+  </body>
+</html>

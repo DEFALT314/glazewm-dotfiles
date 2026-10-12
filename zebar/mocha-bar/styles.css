@@ -1,0 +1,152 @@
+/* Same layout and colors as home/waybar/.config/waybar/style.css */
+:root {
+  --surface0: #313244;
+  --text: #cdd6f4;
+  --lavender: #b4befe;
+  --sky: #89dceb;
+  --sapphire: #74c7ec;
+  --green: #a6e3a1;
+  --yellow: #f9e2af;
+  --red: #f38ba8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+body {
+  font-family: 'JetBrainsMono Nerd Font', 'JetBrainsMono Nerd Font Mono', 'JetBrainsMono NF', monospace;
+  font-size: 15px;
+  color: var(--text);
+  user-select: none;
+  cursor: default;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 100%;
+  padding: 2px 1px 0;
+}
+
+.left,
+.right {
+  display: flex;
+  align-items: center;
+}
+
+.right {
+  justify-content: flex-end;
+}
+
+.workspaces {
+  display: flex;
+  border-radius: 1rem;
+  margin: 2px;
+  margin-left: 0.5em;
+  background-color: var(--surface0);
+}
+
+.workspace {
+  color: var(--lavender);
+  border-radius: 1rem;
+  padding: 0.4rem;
+  white-space: pre;
+}
+
+.workspace.active {
+  color: var(--sky);
+}
+
+.workspace:hover {
+  color: var(--sapphire);
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 1rem;
+  background-color: var(--surface0);
+  border-radius: 1rem;
+  margin: 2px 0;
+  white-space: pre;
+}
+
+.clock {
+  color: var(--lavender);
+}
+
+.tray {
+  gap: 10px;
+}
+
+.tray:empty {
+  display: none;
+}
+
+.tray img {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+/* Volume + battery read as one pill split in the middle. */
+.volume {
+  color: var(--yellow);
+  border-radius: 1rem 0 0 1rem;
+  margin-left: 0.75rem;
+}
+
+.volume:has(+ .battery[hidden]) {
+  border-radius: 1rem;
+  margin-right: 0.75rem;
+}
+
+.battery {
+  padding-left: 0;
+  color: var(--green);
+  border-radius: 0 1rem 1rem 0;
+  margin-right: 0.75rem;
+}
+
+.power {
+  gap: 14px;
+  color: var(--red);
+  margin-right: 0.5rem;
+}
+
+.power-actions {
+  display: none;
+  gap: 14px;
+  color: var(--text);
+}
+
+.power.open .power-actions {
+  display: flex;
+}
+
+.power-actions button:hover {
+  color: var(--red);
+}

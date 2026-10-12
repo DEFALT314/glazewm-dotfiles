@@ -1,0 +1,258 @@
+# GlazeWM: port of home/hyprland/.config/hypr/*.conf
+#
+# Mod key: SUPER on Hyprland -> left ALT here. Windows reserves too many
+# Win+key combos (Win+L always locks the screen, so Win+L "focus right"
+# is impossible). `lalt` instead of `alt` keeps right Alt = AltGr free,
+# otherwise AltGr+c (ć) would close the window, AltGr+e (ę) open
+# Explorer, AltGr+l (ł) move focus, etc.
+#
+# Left on native Windows shortcuts (same keys as on Hyprland):
+#   Win+L lock, Win+Shift+S / PrtSc screenshot, Win+V clipboard,
+#   Win+N notifications, Win+` drop-down Windows Terminal (quake mode),
+#   media / brightness keys.
+
+general:
+  startup_commands: ['shell-exec zebar']
+  shutdown_commands: ['shell-exec taskkill /IM zebar.exe /F']
+  config_reload_commands: []
+
+  # input:follow_mouse = 1
+  focus_follows_cursor: true
+  toggle_workspace_on_refocus: false
+
+  cursor_jump:
+    enabled: true
+    trigger: 'monitor_focus'
+
+  hide_method: 'cloak'
+  show_all_in_taskbar: false
+
+gaps:
+  scale_with_dpi: true
+  # Hyprland gaps_in = 5 is per window side, so 10px between two windows.
+  inner_gap: '10px'
+  # gaps_out = 7, top leaves room for the Zebar bar (34px, see zpack.json).
+  outer_gap:
+    top: '41px'
+    right: '7px'
+    bottom: '7px'
+    left: '7px'
+
+# Borders, rounding and title bars need Windows 11.
+window_effects:
+  focused_window:
+    border:
+      enabled: true
+      color: '#b7bdf8'
+    # Hyprland has no title bars. If some app renders badly, set to false
+    # (in both blocks, otherwise windows jump when focus changes).
+    hide_title_bar:
+      enabled: true
+    corner_style:
+      enabled: true
+      style: 'rounded'
+    transparency:
+      enabled: false
+      opacity: '95%'
+
+  other_windows:
+    border:
+      enabled: true
+      color: '#595959'
+    hide_title_bar:
+      enabled: true
+    corner_style:
+      enabled: true
+      style: 'rounded'
+    # Closest thing to dim_inactive, but the wallpaper shows through instead
+    # of darkening. Try '90%' if you want it.
+    transparency:
+      enabled: false
+      opacity: '90%'
+
+window_behavior:
+  initial_state: 'tiling'
+  state_defaults:
+    floating:
+      centered: true
+      shown_on_top: false
+    fullscreen:
+      maximized: false
+      shown_on_top: false
+
+# Like Hyprland: workspace 1 on the laptop screen, 2-9 on the external
+# monitor. GlazeWM binds by monitor index, counted left to right (then top
+# to bottom). This is the home layout, monitor left of/above the laptop:
+# monitor = 0, laptop = 1. If the laptop sits on the left, swap 0 and 1.
+# With the laptop alone everything opens on it.
+workspaces:
+  - name: '1'
+    bind_to_monitor: 1
+  - name: '2'
+    bind_to_monitor: 0
+  - name: '3'
+    bind_to_monitor: 0
+  - name: '4'
+    bind_to_monitor: 0
+  - name: '5'
+    bind_to_monitor: 0
+  - name: '6'
+    bind_to_monitor: 0
+  - name: '7'
+    bind_to_monitor: 0
+  - name: '8'
+    bind_to_monitor: 0
+  - name: '9'
+    bind_to_monitor: 0
+  - name: '10'
+
+window_rules:
+  - commands: ['ignore']
+    match:
+      - window_process: { equals: 'zebar' }
+
+      # Browser picture-in-picture.
+      - window_title: { regex: '[Pp]icture.in.[Pp]icture' }
+        window_class: { regex: 'Chrome_WidgetWin_1|MozillaDialogClass' }
+
+      # PowerToys popups.
+      - window_process: { equals: 'PowerToys' }
+        window_class: { regex: 'HwndWrapper\[PowerToys\.PowerAccent.*?\]' }
+      - window_title: { equals: 'Command Palette' }
+        window_class: { equals: 'WinUIDesktopWin32WindowClass' }
+      - window_process: { equals: 'PowerToys' }
+        window_title: { regex: '.*? - Peek' }
+
+      # Office splash screens and dialogs (only the main window is tiled).
+      - window_process: { equals: 'EXCEL' }
+        window_class: { not_regex: 'XLMAIN' }
+      - window_process: { equals: 'WINWORD' }
+        window_class: { not_regex: 'OpusApp' }
+      - window_process: { equals: 'POWERPNT' }
+        window_class: { not_regex: 'PPTFrameClass' }
+
+  - commands: ['set-floating']
+    match:
+      - window_process: { equals: 'Flow.Launcher' }
+        window_title: { equals: 'Settings' }
+
+keybindings:
+  # Apps
+  - commands: ['shell-exec wt']
+    bindings: ['lalt+q']
+  - commands: ['shell-exec explorer']
+    bindings: ['lalt+e']
+  # Starting Flow again just shows its search bar, so this works next to
+  # Flow's own hotkey (Alt+Space by default).
+  - commands: ['shell-exec %LOCALAPPDATA%\FlowLauncher\Flow.Launcher.exe']
+    bindings: ['lalt+r']
+  - commands: ['shell-exec rundll32 user32.dll,LockWorkStation']
+    bindings: ['lalt+escape']
+  - commands: ['shell-exec ms-settings:bluetooth']
+    bindings: ['lalt+b']
+
+  # Window management
+  - commands: ['close']
+    bindings: ['lalt+c']
+  - commands: ['wm-exit']
+    bindings: ['lalt+m']
+  - commands: ['toggle-floating --centered']
+    bindings: ['lalt+v']
+  # No dwindle here: new windows split in the current tiling direction,
+  # flip it by hand (Hyprland's commented-out togglesplit).
+  - commands: ['toggle-tiling-direction']
+    bindings: ['lalt+t']
+  - commands: ['toggle-fullscreen']
+    bindings: ['lalt+f']
+  # fullscreen 1 on Hyprland. A maximized window covers the bar.
+  - commands: ['toggle-fullscreen --maximized']
+    bindings: ['lalt+shift+f']
+
+  # GlazeWM only: pause all bindings (for apps that need Alt shortcuts),
+  # reload this file, redraw windows.
+  - commands: ['wm-toggle-pause']
+    bindings: ['lalt+shift+p']
+  - commands: ['wm-reload-config']
+    bindings: ['lalt+shift+r']
+  - commands: ['wm-redraw']
+    bindings: ['lalt+shift+w']
+
+  # Focus
+  - commands: ['focus --direction left']
+    bindings: ['lalt+h', 'lalt+left']
+  - commands: ['focus --direction right']
+    bindings: ['lalt+l', 'lalt+right']
+  - commands: ['focus --direction up']
+    bindings: ['lalt+k', 'lalt+up']
+  - commands: ['focus --direction down']
+    bindings: ['lalt+j', 'lalt+down']
+
+  # Move windows
+  - commands: ['move --direction left']
+    bindings: ['lalt+shift+h', 'lalt+shift+left']
+  - commands: ['move --direction right']
+    bindings: ['lalt+shift+l', 'lalt+shift+right']
+  - commands: ['move --direction up']
+    bindings: ['lalt+shift+k', 'lalt+shift+up']
+  - commands: ['move --direction down']
+    bindings: ['lalt+shift+j', 'lalt+shift+down']
+
+  # Resize. Hyprland does this with Super + right mouse drag, which
+  # GlazeWM can't do (dragging the window edge still works).
+  - commands: ['resize --width -2%']
+    bindings: ['lalt+control+h']
+  - commands: ['resize --width +2%']
+    bindings: ['lalt+control+l']
+  - commands: ['resize --height +2%']
+    bindings: ['lalt+control+k']
+  - commands: ['resize --height -2%']
+    bindings: ['lalt+control+j']
+
+  # Workspaces
+  - commands: ['focus --workspace 1']
+    bindings: ['lalt+1']
+  - commands: ['focus --workspace 2']
+    bindings: ['lalt+2']
+  - commands: ['focus --workspace 3']
+    bindings: ['lalt+3']
+  - commands: ['focus --workspace 4']
+    bindings: ['lalt+4']
+  - commands: ['focus --workspace 5']
+    bindings: ['lalt+5']
+  - commands: ['focus --workspace 6']
+    bindings: ['lalt+6']
+  - commands: ['focus --workspace 7']
+    bindings: ['lalt+7']
+  - commands: ['focus --workspace 8']
+    bindings: ['lalt+8']
+  - commands: ['focus --workspace 9']
+    bindings: ['lalt+9']
+  - commands: ['focus --workspace 10']
+    bindings: ['lalt+0']
+  # workspace e+1 / e-1
+  - commands: ['focus --next-active-workspace-on-monitor']
+    bindings: ['lalt+control+right']
+  - commands: ['focus --prev-active-workspace-on-monitor']
+    bindings: ['lalt+control+left']
+
+  # movetoworkspace (follows the window, like on Hyprland)
+  - commands: ['move --workspace 1', 'focus --workspace 1']
+    bindings: ['lalt+shift+1']
+  - commands: ['move --workspace 2', 'focus --workspace 2']
+    bindings: ['lalt+shift+2']
+  - commands: ['move --workspace 3', 'focus --workspace 3']
+    bindings: ['lalt+shift+3']
+  - commands: ['move --workspace 4', 'focus --workspace 4']
+    bindings: ['lalt+shift+4']
+  - commands: ['move --workspace 5', 'focus --workspace 5']
+    bindings: ['lalt+shift+5']
+  - commands: ['move --workspace 6', 'focus --workspace 6']
+    bindings: ['lalt+shift+6']
+  - commands: ['move --workspace 7', 'focus --workspace 7']
+    bindings: ['lalt+shift+7']
+  - commands: ['move --workspace 8', 'focus --workspace 8']
+    bindings: ['lalt+shift+8']
+  - commands: ['move --workspace 9', 'focus --workspace 9']
+    bindings: ['lalt+shift+9']
+  - commands: ['move --workspace 10', 'focus --workspace 10']
+    bindings: ['lalt+shift+0']
