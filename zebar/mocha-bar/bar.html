@@ -58,7 +58,7 @@
         const d = new Date(date.output.now);
         $('clock').textContent = showDate
           ? `\u{EAB0}  ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`
-          : `\u{F08C7} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+          : `${pad(d.getHours())}:${pad(d.getMinutes())}`;
       }
       date.onOutput(renderClock);
       $('clock').onclick = () => {

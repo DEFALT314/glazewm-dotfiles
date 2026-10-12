@@ -1,11 +1,12 @@
 /* Catppuccin Mocha pills, same layout as my waybar. */
 
-/* Pinned to the Regular file by name. With every JetBrainsMono Nerd Font
-   weight and italic installed, Windows otherwise renders the bar in a
-   heavier, slanted face. */
+/* Shipped with the widget (see fonts/README.md): with every JetBrainsMono
+   Nerd Font weight installed, Windows renders the bar in a bold face. */
 @font-face {
   font-family: 'Bar Font';
-  src: local('JetBrainsMono NF Regular'), local('JetBrainsMonoNF-Regular');
+  src: url('./fonts/JetBrainsMonoNerdFont-Regular-subset.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
 }
 
 :root {
@@ -72,18 +73,27 @@ button {
   justify-content: flex-end;
 }
 
+/* Fixed height and fully round ends, like the waybar pills. Left to the
+   line height, Windows makes them taller and the ends flatter. */
+.workspaces,
+.pill {
+  height: 31px;
+  border-radius: 999px;
+}
+
 .workspaces {
   display: flex;
-  border-radius: 1rem;
+  align-items: center;
   margin: 2px;
   margin-left: 0.5em;
   background-color: var(--surface0);
 }
 
 .workspace {
+  height: 100%;
   color: var(--lavender);
-  border-radius: 1rem;
-  padding: 0.4rem;
+  border-radius: 999px;
+  padding: 0 0.4rem;
   white-space: pre;
 }
 
@@ -98,9 +108,8 @@ button {
 .pill {
   display: flex;
   align-items: center;
-  padding: 0.25rem 1rem;
+  padding: 0 1rem;
   background-color: var(--surface0);
-  border-radius: 1rem;
   margin: 2px 0;
   white-space: pre;
 }
@@ -112,19 +121,19 @@ button {
 /* Volume + battery read as one pill split in the middle. */
 .volume {
   color: var(--yellow);
-  border-radius: 1rem 0 0 1rem;
+  border-radius: 999px 0 0 999px;
   margin-left: 0.75rem;
 }
 
 .volume:has(+ .battery[hidden]) {
-  border-radius: 1rem;
+  border-radius: 999px;
   margin-right: 0.75rem;
 }
 
 .battery {
   padding-left: 0;
   color: var(--green);
-  border-radius: 0 1rem 1rem 0;
+  border-radius: 0 999px 999px 0;
   margin-right: 0.75rem;
 }
 

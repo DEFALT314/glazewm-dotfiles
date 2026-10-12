@@ -193,6 +193,7 @@ keep it available.
 ├── glazewm/config.yaml            window manager: keys, gaps, borders, workspaces, rules
 ├── zebar/
 │   ├── mocha-bar/                 status bar widget (HTML, CSS, zpack.json)
+│   │   └── fonts/                 bundled JetBrainsMono Nerd Font subset
 │   └── settings.json              starts the bar with Zebar
 ├── terminal/catppuccin-mocha.json Windows Terminal fragment
 ├── assets/wallpaper.png
@@ -205,8 +206,10 @@ keep it available.
 [Flow Launcher](https://github.com/Flow-Launcher/Flow.Launcher) ·
 [Catppuccin](https://github.com/catppuccin) ·
 [Bibata Cursor](https://github.com/ful1e5/Bibata_Cursor) ·
+[JetBrains Mono](https://github.com/JetBrains/JetBrainsMono) ·
 [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts)
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE), except the bundled font in `zebar/mocha-bar/fonts/`, which
+keeps its own licenses (see [its README](zebar/mocha-bar/fonts/README.md)).

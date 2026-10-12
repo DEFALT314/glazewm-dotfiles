@@ -31,9 +31,9 @@ gaps:
   scale_with_dpi: true
   # Hyprland gaps_in = 5 is per window side, so 10px between two windows.
   inner_gap: '10px'
-  # gaps_out = 7, top leaves room for the Zebar bar (34px, see zpack.json).
+  # gaps_out = 7, top leaves room for the Zebar bar (37px, see zpack.json).
   outer_gap:
-    top: '41px'
+    top: '44px'
     right: '7px'
     bottom: '7px'
     left: '7px'
