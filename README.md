@@ -147,6 +147,15 @@ installer overwrites `~\.glzr\`, so changes made only there won't survive
 the next install. For quick experiments, edit `~\.glzr\glazewm\config.yaml`
 directly and press `Alt` `Shift` `R`.
 
+The bar's look is set by three variables at the top of
+[`zebar/mocha-bar/styles.css`](zebar/mocha-bar/styles.css):
+
+| Variable           | Default   | Effect                                                                 |
+| ------------------ | --------- | ---------------------------------------------------------------------- |
+| `--bar-scale`      | `0.9`     | Size of the whole bar. Also update the widget height and GlazeWM top gap, as the comment there explains. |
+| `--text-weight`    | `300`     | `300` (Light) or `400` (Regular).                                      |
+| `--bar-background` | `#131020` | Must match the top edge of the wallpaper; the bar is opaque so Windows can use ClearType. |
+
 ### Manual settings
 
 The installer doesn't change these system settings; some of them need admin
@@ -195,7 +204,7 @@ keep it available.
 ├── glazewm/config.yaml            window manager: keys, gaps, borders, workspaces, rules
 ├── zebar/
 │   ├── mocha-bar/                 status bar widget (HTML, CSS, zpack.json)
-│   │   └── fonts/                 bundled JetBrainsMono Nerd Font subset
+│   │   └── fonts/                 bundled JetBrains Mono and Nerd Font icon subsets
 │   └── settings.json              starts the bar with Zebar
 ├── terminal/catppuccin-mocha.json Windows Terminal settings merged into settings.json
 ├── assets/wallpaper.png
@@ -213,5 +222,5 @@ keep it available.
 
 ## License
 
-[MIT](LICENSE), except the bundled font in `zebar/mocha-bar/fonts/`, which
-keeps its own licenses (see [its README](zebar/mocha-bar/fonts/README.md)).
+[MIT](LICENSE), except the bundled fonts in `zebar/mocha-bar/fonts/`, which
+keep their own licenses (see [their README](zebar/mocha-bar/fonts/README.md)).

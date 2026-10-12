@@ -1,13 +1,17 @@
 /* Catppuccin Mocha pills, same layout as my waybar. */
 
-/* Fonts ship with the widget (see fonts/README.md): JetBrains Mono for the
-   text, as a variable font so the weight can be tuned, and the Nerd Font
-   icons on their own. */
+/* Fonts ship with the widget (see fonts/README.md). Static, hinted files
+   only: Windows renders unhinted text (e.g. variable fonts) blurry. */
 @font-face {
   font-family: 'Bar Text';
-  src: url('./fonts/JetBrainsMono-Variable-subset.woff2') format('woff2');
-  font-weight: 100 800;
-  font-style: normal;
+  src: url('./fonts/JetBrainsMono-Light-subset.woff2') format('woff2');
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: 'Bar Text';
+  src: url('./fonts/JetBrainsMono-Regular-subset.woff2') format('woff2');
+  font-weight: 400;
 }
 
 @font-face {
@@ -16,10 +20,20 @@
 }
 
 :root {
-  /* The bar's background is transparent, so Windows draws its text in
-     grayscale with a high gamma, and light text on a dark background comes
-     out heavier than in waybar. 300 here looks like waybar's 400. */
+  /* 300 (Light) or 400 (Regular). Windows draws light-on-dark text heavier
+     than waybar does, so Light here comes closest to waybar's Regular. */
   --text-weight: 300;
+
+  /* Size of the whole bar; 1 is waybar's. If you change it, set the
+     widget height in zpack.json to 38px * scale and the GlazeWM top gap
+     (gaps.outer_gap.top) to that height + 7px. */
+  --bar-scale: 0.9;
+
+  /* An opaque background lets Windows use ClearType for the text, which is
+     sharper than the grayscale it falls back to on transparent windows.
+     This is the color of the top edge of assets/wallpaper.png; match it
+     if you change the wallpaper. */
+  --bar-background: #131020;
 
   --surface0: #313244;
   --text: #cdd6f4;
@@ -45,13 +59,14 @@ html,
 body {
   height: 100%;
   overflow: hidden;
-  background: transparent;
 }
 
 /* GTK resolves rem against the 11pt desktop font rather than 16px. Same
    here, so the rem paddings and margins match waybar's. */
 html {
   font-size: 11pt;
+  zoom: var(--bar-scale);
+  background: var(--bar-background);
 }
 
 body {
@@ -135,23 +150,37 @@ button {
   color: var(--lavender);
 }
 
-/* Volume + battery read as one pill split in the middle. */
-.volume {
-  color: var(--yellow);
-  border-radius: 999px 0 0 999px;
-  margin-left: 0.75rem;
+/* Volume and battery share one pill. Each keeps waybar's paddings: 1rem
+   around the volume, 1rem after the battery. */
+.status {
+  padding: 0;
+  margin: 2px 0.75rem;
 }
 
-.volume:has(+ .battery[hidden]) {
-  border-radius: 999px;
-  margin-right: 0.75rem;
+.status:not(:has(> :not([hidden]))) {
+  display: none;
+}
+
+.volume,
+.battery {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  white-space: pre;
+}
+
+.volume {
+  color: var(--yellow);
+  padding: 0 1rem;
 }
 
 .battery {
-  padding-left: 0;
   color: var(--green);
-  border-radius: 0 999px 999px 0;
-  margin-right: 0.75rem;
+  padding-right: 1rem;
+}
+
+.volume[hidden] + .battery {
+  padding-left: 1rem;
 }
 
 .power {

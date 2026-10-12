@@ -14,7 +14,7 @@
       "shownInTaskbar": false,
       "focused": false,
       "resizable": false,
-      "transparent": true,
+      "transparent": false,
       "includeFiles": ["*.html", "*.css", "fonts/*.woff2"],
       "caching": {
         "defaultDuration": 604800,
@@ -39,7 +39,7 @@
           "offsetX": "0px",
           "offsetY": "0px",
           "width": "100%",
-          "height": "38px",
+          "height": "34px",
           "monitorSelection": {
             "type": "all"
           },
