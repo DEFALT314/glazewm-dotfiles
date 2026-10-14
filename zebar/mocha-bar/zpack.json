@@ -3,7 +3,9 @@
   "name": "mocha-bar",
   "version": "1.0.0",
   "description": "Catppuccin Mocha status bar for GlazeWM.",
-  "tags": ["topbar"],
+  "tags": [
+    "topbar"
+  ],
   "previewImages": [],
   "repositoryUrl": "",
   "widgets": [
@@ -15,7 +17,11 @@
       "focused": false,
       "resizable": false,
       "transparent": false,
-      "includeFiles": ["*.html", "*.css", "fonts/*.woff2"],
+      "includeFiles": [
+        "*.html",
+        "*.css",
+        "fonts/*.woff2"
+      ],
       "caching": {
         "defaultDuration": 604800,
         "rules": []
@@ -29,6 +35,18 @@
           {
             "program": "powershell",
             "argsRegex": "^-NoProfile -Command Add-Type -AssemblyName System\\.Windows\\.Forms; \\[System\\.Windows\\.Forms\\.Application\\]::SetSuspendState\\('Suspend', \\$false, \\$false\\)$"
+          },
+          {
+            "program": "powershell",
+            "argsRegex": "^-NoProfile -Command \\[Console\\]::OutputEncoding = \\[Text\\.Encoding\\]::UTF8; @\\(Get-VpnConnection -ErrorAction Ignore; Get-VpnConnection -AllUserConnection -ErrorAction Ignore\\) \\| ForEach-Object Name \\| ConvertTo-Json -Compress$"
+          },
+          {
+            "program": "rasdial",
+            "argsRegex": "^[^\"]+$"
+          },
+          {
+            "program": "rasphone",
+            "argsRegex": "^-d [^\"]+$"
           }
         ]
       },

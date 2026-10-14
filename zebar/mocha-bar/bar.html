@@ -16,6 +16,10 @@
       </div>
 
       <div class="right">
+        <div id="vpn" class="pill vpn" hidden>
+          <span class="vpn-list"></span>
+          <button class="vpn-toggle" title="VPN"></button>
+        </div>
         <div class="pill status">
           <button id="volume" class="volume" hidden></button>
           <div id="battery" class="battery" hidden></div>
@@ -92,17 +96,86 @@
         if (dev) audio.output.setMute(!dev.isMuted);
       };
 
-      // Battery. Hidden on machines without one.
+      // Battery. Reading it fails now and then (e.g. while plugging in the
+      // charger); those errors keep the last value. It is only hidden on
+      // machines that never reported a battery.
       const battery = zebar.createProvider({ type: 'battery' });
       const batteryIcons = ['\u{F244}', '\u{F243}', '\u{F242}', '\u{F241}', '\u{F240}'];
+      let hasBattery = false;
       battery.onOutput(bat => {
-        const el = $('battery');
         const pct = Math.round(bat.chargePercent);
+        if (!Number.isFinite(pct)) return;
+        hasBattery = true;
+        const el = $('battery');
         el.hidden = false;
         const glyph = bat.isCharging ? '\u{F0084}' : batteryIcons[Math.min(4, Math.floor(pct / 20))];
         el.textContent = ` ${glyph} ${pct}%`;
       });
-      battery.onError(() => ($('battery').hidden = true));
+      battery.onError(() => {
+        if (!hasBattery) $('battery').hidden = true;
+      });
+
+      // VPN: Windows' built-in VPN profiles (Settings > Network > VPN).
+      // Click to unfold them, pick one to connect (dropping the current one),
+      // pick the connected one to disconnect. A connected profile shows up
+      // as a network interface named after it.
+      const vpn = $('vpn');
+      const vpnList = vpn.querySelector('.vpn-list');
+      const vpnToggle = vpn.querySelector('.vpn-toggle');
+      const network = zebar.createProvider({ type: 'network', refreshInterval: 3000 });
+      const listVpns =
+        '[Console]::OutputEncoding = [Text.Encoding]::UTF8; ' +
+        '@(Get-VpnConnection -ErrorAction Ignore; Get-VpnConnection -AllUserConnection -ErrorAction Ignore) | ' +
+        'ForEach-Object Name | ConvertTo-Json -Compress';
+      let vpnProfiles = [];
+      let vpnConnected = null;
+
+      async function loadVpnProfiles() {
+        const { stdout } = await zebar.shellExec('powershell', ['-NoProfile', '-Command', listVpns]);
+        vpnProfiles = [...new Set([].concat(stdout.trim() ? JSON.parse(stdout) : []))];
+        renderVpn();
+      }
+
+      function renderVpn() {
+        const up = new Set((network.output?.interfaces ?? []).map(i => i.friendlyName));
+        vpnConnected = vpnProfiles.find(name => up.has(name)) ?? null;
+        vpn.hidden = vpnProfiles.length === 0;
+        vpn.classList.toggle('connected', vpnConnected !== null);
+        vpnToggle.textContent = vpnConnected ? `\u{F0582} ${vpnConnected}` : '\u{F0582}';
+        vpnList.replaceChildren(
+          ...vpnProfiles.map(name => {
+            const button = document.createElement('button');
+            button.dataset.vpn = name;
+            button.textContent = name;
+            button.classList.toggle('active', name === vpnConnected);
+            return button;
+          }),
+        );
+      }
+
+      async function switchVpn(name) {
+        const current = vpnConnected;
+        if (current) await zebar.shellExec('rasdial', [current, '/disconnect']);
+        if (name !== current) {
+          const { code } = await zebar.shellExec('rasdial', [name]);
+          // Without saved credentials rasdial fails; Windows' own dialog asks.
+          if (code !== 0) await zebar.shellExec('rasphone', ['-d', name]);
+        }
+        network.restart();
+      }
+
+      network.onOutput(renderVpn);
+      vpn.onclick = e => {
+        const name = e.target.closest('[data-vpn]')?.dataset.vpn;
+        if (name === undefined) {
+          if (vpn.classList.toggle('open')) loadVpnProfiles().catch(console.error);
+          return;
+        }
+        vpn.classList.remove('open');
+        switchVpn(name).catch(console.error);
+      };
+      vpn.onmouseleave = () => vpn.classList.remove('open');
+      loadVpnProfiles().catch(console.error);
 
       // Power menu: click the icon to unfold the actions inline (a dropdown
       // can't leave the bar's window).

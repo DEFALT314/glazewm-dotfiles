@@ -21,7 +21,8 @@ installed with one command.
   with vim-style keys, gaps, colored borders, rounded corners and no title
   bars.
 - **Status bar.** A custom [Zebar](https://github.com/glzr-io/zebar) widget
-  with workspaces, clock and date, volume, battery and a power menu.
+  with workspaces, clock and date, a VPN switcher, volume, battery and a
+  power menu.
 - **Launcher.** [Flow Launcher](https://github.com/Flow-Launcher/Flow.Launcher)
   with the Catppuccin theme.
 - **One theme everywhere.** Catppuccin Mocha in the bar, Windows Terminal and
@@ -124,9 +125,18 @@ Click the clock to switch to the date. Click the power icon for suspend,
 hibernate, shutdown and reboot. Scroll over the volume to change it, click
 it to mute.
 
+The VPN pill lists the VPN profiles from **Settings → Network & internet →
+VPN**. It is gray while disconnected and teal with the profile name while
+connected. Click it to unfold the profiles: pick one to connect (the
+current connection is dropped first), or pick the connected one to
+disconnect. Profiles without saved credentials open the Windows sign-in
+dialog. The pill is hidden when there are no profiles.
+
+![Status bar with the VPN menu open](docs/bar-vpn-menu.png)
+
 ![Status bar with the power menu open](docs/bar-power-menu.png)
 
-<sub>Both previews are renders of `zebar/mocha-bar` with sample data.</sub>
+<sub>The previews are renders of `zebar/mocha-bar` with sample data.</sub>
 
 ## Configuration
 

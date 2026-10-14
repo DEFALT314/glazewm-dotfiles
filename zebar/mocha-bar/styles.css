@@ -41,6 +41,8 @@
   --sky: #89dceb;
   --sapphire: #74c7ec;
   --green: #a6e3a1;
+  --teal: #94e2d5;
+  --overlay1: #7f849c;
   --yellow: #f9e2af;
   --red: #f38ba8;
 }
@@ -148,6 +150,37 @@ button {
 
 .clock {
   color: var(--lavender);
+}
+
+/* VPN: gray when off, teal with the profile name when on. */
+.vpn {
+  gap: 14px;
+  color: var(--overlay1);
+}
+
+.vpn.connected {
+  color: var(--teal);
+}
+
+.vpn-toggle {
+  max-width: 14em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vpn-list {
+  display: none;
+  gap: 14px;
+  color: var(--text);
+}
+
+.vpn.open .vpn-list {
+  display: flex;
+}
+
+.vpn-list .active,
+.vpn-list button:hover {
+  color: var(--teal);
 }
 
 /* Volume and battery share one pill. Each keeps waybar's paddings: 1rem

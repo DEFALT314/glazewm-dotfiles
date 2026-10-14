@@ -22,7 +22,7 @@ for weight in Light Regular; do
 done
 
 pyftsubset JetBrainsMonoNerdFont-Regular.ttf \
-  --unicodes="U+EA71,U+EAB0,U+F025,U+F028,U+F240-F244,U+F0084,U+F02CA,U+F0425,U+F057E,U+F0580,U+F0709,U+F075F,U+F0904,U+F0906" \
+  --unicodes="U+EA71,U+EAB0,U+F025,U+F028,U+F240-F244,U+F0084,U+F02CA,U+F0425,U+F057E,U+F0580,U+F0582,U+F0709,U+F075F,U+F0904,U+F0906" \
   --flavor=woff2 --output-file=JetBrainsMonoNerdFont-icons-subset.woff2
 ```
 
